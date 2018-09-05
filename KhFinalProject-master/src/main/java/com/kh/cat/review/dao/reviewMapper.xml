@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+    <!-- namespace = 연결되는 인터페이스 -->
+<mapper namespace="com.kh.cat.review.dao.ReviewInter">
+	
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야함) -->
+	<!-- 키를 bean 에 반환함
+		parameterType="com.file.dto.BoardBean" <- 파라메터로 사용될 빈
+		useGeneratedKeys="true" <- insert 후 키 생성 여부
+		keyProperty="idx" <- 키가 될 필드
+		keyColumn="idx" <- 키가 저장될 컬럼
+	 -->
+	 <!-- 리뷰 작성 -->
+	 <insert id="reviewWrite" 
+	 	parameterType="review"
+	 	useGeneratedKeys="true"
+	 	keyProperty="review_idx"
+	 	keyColumn="review_idx">
+	 	INSERT INTO review(review_idx,store_idx,id,review_storeName,review_star, review_content, review_likeCnt, review_date, review_profile,review_replyCnt)
+	 		VALUES(seq_review.NEXTVAL,
+	 		<if test="store_idx.equals(0)">
+	 			null,
+	 		</if>
+	 		<if test="!store_idx.equals(0)">
+	 			#{store_idx},
+	 		</if>
+	 		
+	 		#{id},#{review_storeName},#{review_star},#{review_content},0,SYSDATE,#{review_profile},0)
+	 </insert>
+	 <select id="starAvg" resultType="Double">
+	 	SELECT ROUND(AVG(review_star), 2) FROM review WHERE store_idx = #{param1}
+	 </select>	 
+	 <update id="storeReviewUpdate">
+	 	UPDATE store SET store_revCnt = store_revCnt+1, store_revDate = SYSDATE, store_star=#{param2} WHERE store_idx=#{param1}
+	 </update>
+	 <update id="totalUpdate">
+	 	UPDATE total SET  total_revCnt = total_revCnt+1, total_starAvg=#{param2} WHERE store_idx=#{param1} AND total_date > to_date(SYSDATE-1, 'YY/MM/DD')
+	 </update>	 
+	 
+	 
+	 
+	 <insert id="hashtag">
+	 	INSERT INTO hash(hash_tag,hash_cate,review_idx)
+	 		VALUES(#{param1},'review',#{param2})
+	 </insert>
+	 
+	 <insert id="reviewPhotoWrite">
+	 	INSERT INTO revPhoto(review_idx,revPhoto_photo)
+	 		VALUES(#{param1},#{param2})
+	 </insert>
+	 
+	 
+	 <select id="storeListCnt" resultType="Integer">
+	 	SELECT COUNT(*) FROM store WHERE store_name LIKE '%'|| #{param1}||'%' AND store_regist=1
+	 </select>
+	 <select id="storeList" resultType="store"> 	
+	 	
+	 	SELECT store_idx, store_name, store_addr 
+	 	FROM(SELECT store_idx, store_name, store_addr,ROW_NUMBER() 
+	 	OVER(ORDER BY store_idx DESC) AS rnum FROM store WHERE store_name LIKE '%'|| #{param1}||'%' AND store_regist=1)
+		WHERE rnum BETWEEN #{param2} AND #{param3}
+	 	
+	 </select>
+	 
+	 <!-- 리뷰 리스트 -->
+	 <select id="reviewList" resultType="review">
+	 	<choose>
+	 		<when test="store_idx==0">
+	 			SELECT * FROM(SELECT review_idx,store_idx,id,review_storeName,review_star,review_content,review_likeCnt,review_date,review_profile
+				,review_replyCnt,ROW_NUMBER() OVER(
+				<if test="range.equals('최신순')">
+			 		ORDER BY review_date DESC
+				</if>		
+				<if test="range.equals('좋아요순')">
+					ORDER BY review_likeCnt DESC,review_date DESC
+				</if>
+				) AS rnum FROM review)
+				WHERE rnum BETWEEN #{start} AND #{end}
+	 		</when>
+	 		<when test="store_idx>0">
+		 		SELECT * FROM(SELECT review_idx,store_idx,id,review_storeName,review_star,review_content,review_likeCnt,review_date,review_profile
+				,review_replyCnt,ROW_NUMBER() OVER(
+				<if test="range.equals('최신순')">
+			 		ORDER BY review_date DESC
+				</if>		
+				<if test="range.equals('좋아요순')">
+					ORDER BY review_likeCnt DESC,review_date DESC
+				</if>
+				) AS rnum FROM review WHERE store_idx= #{store_idx})
+				WHERE rnum BETWEEN #{start} AND #{end}
+			</when>
+			<otherwise>
+				SELECT * FROM(SELECT review_idx,store_idx,id,review_storeName,review_star,review_content,review_likeCnt,review_date,review_profile
+				,review_replyCnt,ROW_NUMBER() OVER(
+				<if test="range.equals('최신순')">
+			 		ORDER BY review_date DESC
+				</if>		
+				<if test="range.equals('좋아요순')">
+					ORDER BY review_likeCnt DESC,review_date DESC
+				</if>
+				) AS rnum FROM review WHERE review_storeName LIKE '%'||#{review_search}||'%')
+				WHERE rnum BETWEEN #{start} AND #{end}
+	 		</otherwise>
+	 	</choose>  		 	
+	</select> 
+	
+	<!-- 페이징 count -->
+	<select id="allCount" resultType="Integer">
+		SELECT COUNT(*) FROM review
+	</select>
+	<select id="storeReviewCount" resultType="Integer">
+		SELECT COUNT(*) FROM review WHERE store_idx=#{param1}
+	</select>
+	<select id="searchAndReviewCount" resultType="Integer">
+		SELECT COUNT(*) FROM review WHERE review_storeName LIKE '%'||#{param1}||'%'
+	</select>
+	<select id="searchOrReviewCount" resultType="Integer" parameterType="hashmap">
+		SELECT COUNT(*) FROM review WHERE 
+		<foreach collection="review_searchCnt" item="review_searchCnt" index="index" separator="OR">
+			review_storeName LIKE '%'||#{review_searchCnt}||'%'
+		</foreach>
+	</select>
+	<select id="searchHashReviewCount" resultType="Integer" parameterType="hashmap">
+		SELECT COUNT(*) FROM review, (SELECT * FROM hash WHERE
+		<foreach collection="review_searchCnt" item="review_searchCnt" index="index" separator="OR">
+			hash_tag LIKE '%'||#{review_searchCnt}||'%'
+		</foreach>
+		) hashtag WHERE review.review_idx=hashtag.review_idx
+	</select>
+	
+	
+	
+	<select id="reviewList_or" resultType="review" parameterType="hashmap">
+		SELECT * FROM
+		(SELECT review_idx,store_idx,id,review_storeName,review_star,review_content,review_likeCnt,review_date,review_profile,
+		,review_replyCntROW_NUMBER() OVER(ORDER BY review_idx DESC) AS rnum FROM review WHERE 
+		<foreach collection="review_search" item="review_search" index="index" separator="OR">
+			review_storeName LIKE '%'||#{review_search}||'%'
+		</foreach>
+		) WHERE rnum BETWEEN #{start} AND #{end}
+	 	<if test="range.equals('최신순')">
+	 		ORDER BY review_date DESC
+		</if>		
+		<if test="range.equals('좋아요순')">
+			ORDER BY review_likeCnt DESC
+		</if>
+	</select>
+	
+	<select id="reviewList_hash" resultType="review" parameterType="hashmap">
+	 	SELECT * FROM 
+	 	(SELECT review.review_idx,review.store_idx,review.id,review.review_storeName,review.review_star,review.review_content,
+	 	review.review_likeCnt,review.review_date,review.review_profile,,review_replyCnt,
+		ROW_NUMBER() OVER(ORDER BY review.review_idx DESC) AS rnum FROM review, (SELECT * FROM hash WHERE 
+		<foreach collection="review_search" item="review_search" index="index" separator="OR">
+			hash_tag LIKE '%'||#{review_search}||'%'
+		</foreach>
+		) hashtag WHERE review.review_idx=hashtag.review_idx) WHERE rnum BETWEEN #{start} AND #{end}
+	 	<if test="range.equals('최신순')">
+	 		ORDER BY review_date DESC
+		</if>		
+		<if test="range.equals('좋아요순')">
+			ORDER BY review_likeCnt DESC
+		</if>
+	</select>
+
+ 	<select id="reviewList_store" resultType="review">
+		SELECT * FROM review WHERE store_idx= #{param1} ORDER BY review_date DESC
+	 </select>
+	 
+	 <select id="reviewHash" resultType="hash">
+	 	SELECT hash_tag FROM hash WHERE hash_cate='review' AND review_idx = #{param1}
+	 </select>
+	 
+	 <select id="reviewPhoto" resultType="revPhoto">
+	 	SELECT revPhoto_photo FROM revPhoto WHERE review_idx = #{param1}
+	 </select>
+	 
+	 <!-- 포인트 적립(사진 미포함 : 50) -->
+	 <update id="review_point">
+	 	UPDATE member SET pointcnt = pointcnt + 50 WHERE id=#{param1}
+	 </update>
+	 
+	 <insert id="review_pointList">
+	 	INSERT INTO pointlist VALUES(seq_pointList.NEXTVAL, #{param1}, 50, '증가', '리뷰작성', SYSDATE)
+	 </insert>
+	 
+	 <!-- 포인트 적립(사진 포함 : 100) -->
+	 <update id="photoReview_point">
+	 	UPDATE member SET pointcnt = pointcnt + 100 WHERE id=#{param1}
+	 </update>
+	 
+	 <insert id="photoReview_pointList">
+	 	INSERT INTO pointlist VALUES(seq_pointList.NEXTVAL, #{param1}, 100, '증가', '리뷰작성', SYSDATE)
+	 </insert>
+	 
+	 <!-- 좋아요 수 조회 -->
+	 <select id="review_likeCnt" resultType="Review">
+	 	SELECT review_likecnt, id FROM review WHERE review_idx= #{param1}
+	 </select>
+	 
+	 <!-- 좋아요 10일 때 포인트 적립 -->
+	 <update id="likePoint">
+	 	UPDATE member SET pointcnt = pointcnt + 1000 WHERE id=#{param1}
+	 </update>
+	 
+	 <insert id="likePointList">
+	 	INSERT INTO pointlist VALUES(seq_pointList.NEXTVAL, #{param1}, 1000, '증가', '좋아요', SYSDATE)
+	 </insert>
+	 
+	 <!-- 좋아요 10개 이상일 때 1개당 100포인트 적립 -->
+	 <update id="likePointt">
+	 	UPDATE member SET pointcnt = pointcnt + 100 WHERE id = #{param1}
+	 </update>
+	 
+	 <insert id="likePointListt">
+	 	INSERT INTO pointlist VALUES(seq_pointList.NEXTVAL, #{param1}, 100, '증가', '좋아요', SYSDATE)
+	 </insert>
+	 
+	 
+	 <!-- 신고하기 -->
+	 <insert id="complain" parameterType="complain">
+	 	INSERT INTO complain
+	 	<choose>
+	 		<when test="review_idx == ''">
+				VALUES(seq_complain.NEXTVAL,#{id},#{complain_id},#{complain_type},#{complain_content},#{complain_cate},SYSDATE,0,null,#{revReply_idx})
+			</when>
+			<otherwise>
+				VALUES(seq_complain.NEXTVAL,#{id},#{complain_id},#{complain_type},#{complain_content},#{complain_cate},SYSDATE,0,#{review_idx},null)
+	 		</otherwise>
+	 	</choose>
+	 </insert>
+	 
+	 
+	 <!-- 별점수 조회 -->
+	 <select id="reviewStar" resultType="Double">
+	 	SELECT review_star FROM review WHERE review_idx= #{param1}
+	 </select>
+	 
+	 <!-- 리뷰 삭제 -->
+	 <delete id="review_delete">
+	 	DELETE FROM review WHERE review_idx = #{param1}
+	 </delete>
+	 
+	 <!-- 리뷰 수정 페이지 -->
+	 <select id="review_updateForm" resultType="review">
+	 	SELECT * FROM review WHERE review_idx = #{param1}
+	 </select>
+	 
+	 <!-- 리뷰수정 -->
+	 <update id="review_update">
+	 	UPDATE review SET review_storeName=#{review_storeName}, review_star = #{review_star}, review_content=#{review_content} WHERE review_idx=#{review_idx}
+	 </update>
+	
+	<!-- 해시태그 삭제 -->
+	<delete id="review_HashDel">
+		DELETE FROM hash WHERE review_idx = #{param1}
+	</delete>
+	
+	<!-- 리뷰 사진 삭제 -->
+	<delete id="review_PhotoDel">
+		DELETE FROM revPhoto WHERE review_idx = #{param1}
+	</delete>
+	
+	<!-- 리뷰 좋아요 select -->
+	<select id="likeSel" resultType="String">
+		SELECT * FROM revLike WHERE review_idx=#{param1} AND id=#{param2}
+	</select>
+	
+	<!-- 리뷰 좋아요 insert -->
+	<insert id="likeInsert"
+		parameterType="revLike"
+	 	useGeneratedKeys="true"
+	 	keyProperty="revLike_idx"
+	 	keyColumn="revLike_idx"
+	>
+		INSERT INTO revLike VALUES(seq_revLike.NEXTVAL,#{review_idx},#{id},SYSDATE)
+	</insert>
+	<!-- 좋아요시 알람 추가 -->
+	<insert id="alarmLike"	>
+		INSERT INTO alarm (alarm_idx,alarm_id,alarm_cate,revLike_idx,alarm_read) VALUES (seq_alarm.NEXTVAL,#{param1},'좋아요',#{param2},0)
+	</insert>
+	
+	
+	<!-- 좋아요 수 증가 -->
+	<update id="likeCntUp">
+		UPDATE review SET review_likeCnt = review_likeCnt+1 WHERE review_idx=#{param1}
+	</update>
+	
+	<!-- 좋아요 수 감소 -->
+	<update id="likeCntDown">
+		UPDATE review SET review_likeCnt = review_likeCnt-1 WHERE review_idx=#{param1}
+	</update>
+	
+	<!-- 리뷰 좋아요 delete -->
+	<delete id="likeDelete">
+		DELETE FROM revLike WHERE review_idx=#{param1} AND id=#{param2}
+	</delete>
+	<!-- 좋아요 취소시 알람 지우기 -->
+	<delete id="alarmLikeDel">
+		DELETE FROM alarm WHERE alarm_idx=#{param1} 
+	</delete>
+	
+	
+	<!-- 리뷰 좋아요 select(List) -->
+	<select id="likeList" resultType="revLike">
+		SELECT review_idx FROM revLike WHERE id=#{param1}
+	</select>
+	
+	<!-- 댓글 리스트 -->
+	<select id="replySelect" resultType="revReply">
+		SELECT * FROM(SELECT revReply_idx,review_idx,id,revReply_content,revReply_date,revReply_profile
+			,ROW_NUMBER() OVER(ORDER BY revReply_date DESC) AS rnum FROM revReply WHERE review_idx=#{param1})
+		WHERE rnum BETWEEN #{param2} AND #{param3} ORDER BY revReply_date DESC
+	</select>
+	<select id="replyAllCnt" resultType="Integer">
+		SELECT COUNT(*) FROM revReply WHERE review_idx=#{param1}
+	</select>
+	
+	
+	<!-- 댓글 작성 -->
+	<insert id="replyWrite"
+		parameterType="revReply"
+	 	useGeneratedKeys="true"
+	 	keyProperty="revreply_idx"
+	 	keyColumn="revreply_idx">
+		INSERT INTO revReply VALUES(seq_revReply.NEXTVAL,#{review_idx},#{id},#{revreply_content},SYSDATE,#{revreply_profile})
+	</insert>
+	<update id="replyCntUp">
+		UPDATE review SET review_replyCnt = review_replyCnt+1 WHERE review_idx=#{param1}
+	</update>
+	<!-- 알람  -->
+	<insert id="alamReply">
+		INSERT INTO alarm (alarm_idx,alarm_id,alarm_cate,revReply_idx,alarm_read) VALUES (seq_alarm.NEXTVAL,#{param1},'댓글',#{param2},0)
+	</insert>
+	
+	
+	<!-- 댓글 삭제 -->
+	<delete id="Revreply_delete">
+	 	DELETE FROM revReply WHERE revReply_idx = #{param1}
+	 </delete>
+	 <update id="replyCntDown">
+		UPDATE review SET review_replyCnt = review_replyCnt-1 WHERE review_idx=#{param1}
+	</update>
+	
+	<!-- 댓글 수정 -->
+	<update id="Revreply_update">
+		UPDATE revReply SET revReply_content = #{param1} WHERE revReply_idx=#{param2} AND review_idx=#{param3}
+	</update>
+	 
+</mapper>

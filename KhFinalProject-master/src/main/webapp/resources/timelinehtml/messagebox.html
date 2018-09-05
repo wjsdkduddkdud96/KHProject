@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>		
+			#receive{float: left;border:1px solid black;background-color: #2637a4;color: white;}
+			#send{float: left;width:71.63px;border:1px solid black;background-color: lightgray;}
+			#messagebox{position: absolute;top: 60px;}
+			table, th{border-bottom: 1px solid black;border-top: 1px solid black;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+			th{width: 200px;}
+			td{border-bottom: 1px solid lightgray;width: 200px;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+		</style>
+</head>
+<body>
+	<div>
+			<div id="receive" onclick="receive()">
+			받은 쪽지
+			</div>
+			<div id="send" onclick="send()">
+			보낸 쪽지
+			</div>
+			<div id="messagebox">
+				<table>
+					<thead>
+					<tr>
+						<th id="sendorreceive">보낸사람</th>
+						<th>쪽지내용</th>
+						<th>날짜</th>
+					</tr>
+					</thead>
+					<tbody id="list">
+					
+					</tbody>
+					<tr>
+						<td colspan="3" id="paging" style="text-aline:center">
+							<div id="container"></div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+</body>
+<script>
+ /* $.ajax({
+	url:"./receivelist",
+	type:"get",
+	data:{
+		id : userid
+	},
+	dataType:"json",
+	success:function(d){
+		receivelist(d.list);
+	},
+	error:function(e){
+		console.log(e);
+	}
+}); */
+</script>
+</html>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+    <!-- typeAlias Dto경로를 축약해준다 -->
+    <!-- alias:이름 type:경로 -->
+<configuration>
+	<typeAliases>
+	
+		<typeAlias alias="member" type="com.kh.cat.dto.MemberDTO"/>
+		<typeAlias alias="store" type="com.kh.cat.dto.StoreDTO"/>
+		<typeAlias alias="storeLike" type="com.kh.cat.dto.StoreLikeDTO"/>
+		<typeAlias alias="menu" type="com.kh.cat.dto.MenuDTO"/>
+		<typeAlias alias="total" type="com.kh.cat.dto.TotalDTO"/>
+		<typeAlias alias="review" type="com.kh.cat.dto.ReviewDTO"/>
+		<typeAlias alias="revPhoto" type="com.kh.cat.dto.RevPhotoDTO"/>
+		<typeAlias alias="revLike" type="com.kh.cat.dto.RevLikeDTO"/>
+		<typeAlias alias="revReply" type="com.kh.cat.dto.RevReplyDTO"/>
+		<typeAlias alias="complain" type="com.kh.cat.dto.ComplainDTO"/>
+		<typeAlias alias="follow" type="com.kh.cat.dto.FollowDTO"/>
+		<typeAlias alias="dm" type="com.kh.cat.dto.DMDTO"/>
+		<typeAlias alias="pointList" type="com.kh.cat.dto.PointListDTO"/>
+		<typeAlias alias="coupon" type="com.kh.cat.dto.CouponDTO"/>
+		<typeAlias alias="couponBox" type="com.kh.cat.dto.CouponBoxDTO"/>
+		<typeAlias alias="board" type="com.kh.cat.dto.BoardDTO"/>
+		<typeAlias alias="boardReply" type="com.kh.cat.dto.BoardReplyDTO"/>
+		<typeAlias alias="hash" type="com.kh.cat.dto.HashDTO"/>
+		<typeAlias alias="alarm" type="com.kh.cat.dto.AlarmDTO"/>
+		
+	</typeAliases>
+</configuration>

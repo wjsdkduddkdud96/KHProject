@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace=연결되는 인터페이스 -->    
+<mapper namespace="com.kh.cat.point.dao.PointInter">
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야한다.(몇가지 옵션이 필요하다.)) -->
+	<!-- 
+		parameterType 지정 (파라메터로 사용될 dto(bean))
+		useGenertedKeys = "true" (insert 후 키 생성 여부)
+		keyProperty = "idx" (키가 될 필드(dto변수))
+		keyColumn = "idx" (키가 저장될 DB 컬럼)
+	-->
+	
+	<!-- 쿠폰 리스트 출력 -->
+	<!-- <select id="couponShopList" resultType="couponBox">
+		SELECT * FROM couponbox ORDER BY couponbox_price ASC
+	</select> -->
+	
+	<!-- 쿠폰 금액 확인-->
+	<!-- <select id="couponPrice" resultType="Integer">
+		SELECT couponbox_price FROM couponbox WHERE couponbox_code = #{param1}
+	</select> -->
+	
+	<!-- myPoint 확인 -->
+	<select id="myPoint" resultType="Integer" parameterType="String">
+		SELECT pointCnt FROM member WHERE id = #{param1}
+	</select>
+	
+	<update id="couponPurchase">
+		UPDATE member SET pointCnt = pointCnt - #{param2} WHERE id = #{param1}
+	</update>
+	
+	
+	<!-- int couponBox_code;
+	String id;
+	long couponBox_price;
+	String couponBox_name;
+	Date couponBox_date;
+	int couponBox_use; -->
+	<insert id="myCoupon" parameterType="couponBox">
+		INSERT INTO couponBox 
+			VALUES(#{couponBox_code}, #{id}, #{couponBox_use}, SYSDATE,
+				 #{couponBox_name}, #{couponBox_price})
+	</insert>
+	
+	<!-- 포인트리스트 추가 -->
+	<insert id="pointListAdd">
+		INSERT INTO pointlist VALUES(seq_pointList.NEXTVAL, #{param1}, #{param2}, '감소', '쿠폰구매', SYSDATE)
+	</insert>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+		#userId{left:243px;top:77px}
+        #div1 {height : 200px;width : 200px;float : left;}
+         #selPicture{position: absolute; left:50px;}
+         #updateprofile {height : 128px;width : 128px;border : 1px solid black;text-align: center;}
+         #confirm,#deleteid{margin-top: 5px;background-color: #2637a4;color: white;border: 0px;}
+         #bottom{text-align: center;}
+         #updatecontent{color:red;}
+         #overlayMail{display:none;}
+      </style>
+
+</head>
+<body>
+      <h2>회원정보 수정</h2>
+      <div id="div1">
+         <div id="updateprofile" style='display:table-cell;vertical-align:middle'>
+           	 현재 프로필
+         </div>
+         <div id="pic">
+          	<button id="selPicture" onclick="selPicture()">사진선택</button><br/><br/>
+          	<span id='updatecontent'>사진선택 클릭시 기존 사진은 삭제가 되어집니다.</span>
+         </div>
+      </div>
+      <table>
+        <tr>
+            <th>아이디 : </th>
+            <td><input type="text" id="userId" value="${sessionScope.loginId}" readonly></td>
+         </tr>
+         <tr>
+            <th>현재비밀번호 : </th>
+            <td><input type="password" id="CurrentUserPw" placeholder="현재비밀번호"></td>            
+         </tr>
+         <tr>
+            <th>비밀번호 : </th>
+            <td><input type="password" id="userPw" onkeyup="chgPw()" placeholder="비밀번호"></td>
+         </tr>
+         <tr>
+            <th>비밀번호확인 : </th>
+            <td><input type="password" id="userPwChk" onkeyup="chgPw()" placeholder="비밀번호확인"></td>          
+         </tr>
+         <tr>          
+            <td colspan="2"><span  id="confirmPw"></span></td>           
+         </tr>
+         <th>이름 : </th>
+            <td><input type="text" id="userName" placeholder="이름"></td>
+         <tr>
+            <th>이메일 : </th>
+            <td><input type="email" id="userEmail" placeholder="이메일" onchange="chgMail()"></td>
+            <td><input id="overlayMail" type="button" onclick="emailcheck()"value="중복체크"/></td>
+         </tr>
+         <tr>
+         <th>핸드폰번호</th>
+        <td>
+            <input id="hp1" name="hp1" type="text" class="frm_input tel" size="3" maxlength="3" placeholder="01X"/>-
+            <input id="hp2" name="hp2" type="text" class="frm_input tel" size="3" maxlength="4" placeholder="XXXX"/>-
+            <input id="hp3" name="hp3" type="text" class="frm_input tel" size="3" maxlength="4" placeholder="XXXX"/>
+        </td>    
+        </tr>   
+   </table>
+        <div id="bottom">
+            <button id="confirm" onclick="updatesave()">확인</button>
+            <input id="deleteid" type="button" value="탈퇴하기" onclick="window.open('./leaveForm','회원 탈퇴','width=500,height=500,location=no,status=no,scrollbars=yes');">
+      </div>
+</body>
+
+</html>

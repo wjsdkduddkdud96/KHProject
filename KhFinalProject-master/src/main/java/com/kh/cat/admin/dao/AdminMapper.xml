@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace=연결되는 인터페이스 -->    
+<mapper namespace="com.kh.cat.admin.dao.AdminInter">
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야한다.(몇가지 옵션이 필요하다.)) -->
+	<!-- 
+		parameterType 지정 (파라메터로 사용될 dto(bean))
+		useGenertedKeys = "true" (insert 후 키 생성 여부)
+		keyProperty = "idx" (키가 될 필드(dto변수))
+		keyColumn = "idx" (키가 저장될 DB 컬럼)
+	-->
+	<!-- 쪽지보내기 -->
+	<insert id="dm_write" parameterType="dm" useGeneratedKeys="true" keyProperty="dm_idx" keyColumn="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date) 
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, #{dm_content}, SYSDATE)
+	</insert>
+	<!-- 쪽지보낼시 알람추가 -->
+	<insert id="alarm_dm" parameterType="dm">
+		INSERT INTO alarm(alarm_idx, alarm_id, alarm_cate, dm_idx, alarm_read) 
+			VALUES(seq_alarm.NEXTVAL, #{dm_id}, '메세지', #{dm_idx}, 0)
+	</insert>
+	
+	<!-- 신고리스트(관리자) -->
+	<select id="complainList" resultType="complain">
+		SELECT complain_idx, id, complain_id, complain_type, complain_content, complain_cate, complain_date, complain_black, review_idx, revreply_idx FROM
+		(SELECT complain_idx, id, complain_id, complain_type, complain_content, complain_cate, complain_date, complain_black, review_idx, revreply_idx,
+		ROW_NUMBER() OVER (ORDER BY complain_idx DESC) AS rnum FROM complain)
+		WHERE rnum BETWEEN #{param1} AND #{param2}
+	</select>
+	
+	<!-- 가게 등록 리스트(관리자) -->
+	<select id="storeRegistList" resultType="store">
+		SELECT store_idx, id, store_photo, store_name, store_ceo, store_addr, store_time, store_food, store_phone, store_rest, store_bhit, store_revcnt, store_revdate, store_price, store_star, store_regist, store_storelikecnt FROM
+		(SELECT store_idx, id, store_photo, store_name, store_ceo, store_addr, store_time, store_food, store_phone, store_rest, store_bhit, store_revcnt, store_revdate, store_price, store_star, store_regist, store_storelikecnt ,
+		ROW_NUMBER() OVER (ORDER BY store_idx DESC) AS rnum FROM store WHERE store_regist=0)
+		WHERE rnum BETWEEN #{param1} AND #{param2}
+	</select>
+	
+	<!-- 신고된 리뷰 리스트 -->
+	<select id="comp_reviewList" resultType="review">
+		SELECT * FROM review WHERE review_idx = #{param1}
+	</select>
+	
+	<!-- 블랙리스트 추가 -->
+	<update id="blackListAdd" parameterType="String">
+		UPDATE member SET aut = 'black' WHERE id = #{param1}
+	</update>
+	
+	<!-- 리뷰 삭제 -->
+	<delete id="review_del">
+		DELETE FROM review WHERE review_idx = #{param1}
+	</delete>
+	
+	
+	<!-- 해시태그  -->
+	<select id="reviewHash" resultType="hash">
+	 	SELECT hash_tag FROM hash WHERE hash_cate='review' AND review_idx = #{param1}
+	 </select>
+	 
+	 <!-- 리뷰 사진 -->
+	 <select id="reviewPhoto" resultType="revPhoto">
+	 	SELECT revPhoto_photo FROM revPhoto WHERE review_idx = #{param1}
+	 </select>
+	 
+	 <!-- 가게 등록 승인 -->
+	<update id="registYes" parameterType="String">
+		UPDATE store SET store_regist = 1 WHERE store_idx = #{param1}
+	</update>
+	
+	<!-- 게시물 삭제시 신고당한 사람에게 쪽지 -->
+	<insert id="review_del_dm" parameterType="dm" useGeneratedKeys="true" keyProperty="dm_idx" keyColumn="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date)
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, #{dm_content}, SYSDATE)
+	</insert>
+	
+	<!-- 알람추가 -->
+	<insert id="review_del_dm_alarm" parameterType="dm">
+		INSERT INTO alarm(alarm_idx, alarm_id, alarm_cate, dm_idx, alarm_read)
+			VALUES(seq_alarm.NEXTVAL, #{dm_id}, '메세지', #{dm_idx}, 0)
+	</insert>
+	
+	<!-- 게시물 삭제시 신고한 사람에게 쪽지 -->
+	<insert id="review_del_dm2" parameterType="dm" useGeneratedKeys="true" keyColumn="dm_idx" keyProperty="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date)
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, '신고한 게시물(리뷰)이 삭제되었습니다.', SYSDATE)
+	</insert>
+	
+	<!-- 알람추가 -->
+	<insert id="review_del_dm2_alarm" parameterType="dm">
+		INSERT INTO alarm(alarm_idx, alarm_id, alarm_cate, dm_idx, alarm_read)
+			VALUES(seq_alarm.NEXTVAL, #{dm_id}, '메세지', #{dm_idx}, 0)
+	</insert>
+	
+	<!-- 게시물(댓글) 삭제시 신고한 사람에게 쪽지 -->
+	<insert id="revReply_del_dm3" parameterType="dm" useGeneratedKeys="true" keyColumn="dm_idx" keyProperty="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date)
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, '신고한 게시물(댓글)이 삭제되었습니다.', SYSDATE)
+	</insert>
+	
+	<insert id="revReply_del_dm3_alarm" parameterType="dm">
+		INSERT INTO alarm(alarm_idx, alarm_id, alarm_cate, dm_idx, alarm_read)
+			VALUES(seq_alarm.NEXTVAL, #{dm_id}, '메세지', #{dm_idx}, 0)
+	</insert>
+	
+	
+	 <!-- 등록 승인 시 쪽지 -->
+	<insert id="regY_dm_Write" parameterType="dm" useGeneratedKeys="true" keyProperty="dm_idx" keyColumn="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date)
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, '가게등록이 승인되었습니다.', SYSDATE)
+	</insert>
+	
+	<!-- 가게 등록 거절시 알람 추가 -->
+	<insert id="alarm_registYN" parameterType="dm">
+		INSERT INTO alarm(alarm_idx, alarm_id, alarm_cate, dm_idx, alarm_read)
+			VALUES(seq_alarm.NEXTVAL, #{dm_id}, '메세지', #{dm_idx}, 0)
+	</insert>
+	
+	<!-- 등록 거절 시 쪽지 -->
+	<insert id="regNo_dmWrite" parameterType="dm" useGeneratedKeys="true" keyProperty="dm_idx" keyColumn="dm_idx">
+		INSERT INTO dm(dm_idx, id, dm_id, dm_content, dm_date)
+			VALUES(seq_dm.NEXTVAL, #{id}, #{dm_id}, #{dm_content}, SYSDATE)
+	</insert>
+	
+	<!-- 등록 거절 시 삭제 -->
+	<delete id="storeDel" parameterType="String">
+		DELETE FROM store WHERE store_idx = #{param1}
+	</delete>
+	
+	<!-- 리뷰 신고 취하 -->
+	<delete id="complainDel">
+		DELETE FROM complain WHERE review_idx = #{param1} AND id = #{param2}
+	</delete>
+	
+	<!-- 댓글 신고 취하 -->
+	<delete id="complainDel2">
+		DELETE FROM complain WHERE revReply_idx = #{param1} AND id = #{param2}
+	</delete>
+
+	<!-- 신고된 리뷰댓글 리스트 -->
+	<select id="comp_revReplyList" resultType="revReply">
+		SELECT * FROM revReply WHERE revReply_idx = #{param1}
+	</select>
+	
+	<!-- 신고된 댓글 삭제 -->
+	<delete id="revReply_del">
+		DELETE FROM revReply WHERE revReply_idx = #{param1}
+	</delete>
+	
+	<!-- 블랙리스트 추가 시 black 유무 변경 -->
+	<update id="comp_black">
+		UPDATE complain SET complain_black = 1 WHERE complain_idx = #{param1}
+	</update>
+	
+	<!-- 블랙추가시 리뷰 삭제 -->
+	<delete id="black_review_del">
+		DELETE FROM review WHERE id = #{param1}
+	</delete>
+	
+	<!-- 블랙추가시 리뷰댓글 삭제 -->
+	<delete id="black_revReply_del">
+		DELETE FROM revReply WHERE id = #{param1}
+	</delete>
+	
+	<!-- 블랙추가시 게시판 삭제 -->
+	<delete id="black_board_del">
+		DELETE FROM board WHERE id = #{param1}
+	</delete>
+	
+	<!-- 신고리스트 총 갯수 -->
+	<select id="complainAllCnt" resultType="Integer">
+		SELECT COUNT(*) FROM complain
+	</select>
+	
+	<!-- 가게 등록 리스트 총 갯수 -->
+	<select id="storeRegistAllCnt" resultType="Integer">
+		SELECT COUNT(*) FROM store WHERE store_regist=0
+	</select>
+	
+	<!-- <select id="reviewIdxChk" resultType="Integer">
+		SELECT review_idx FROM review WHERE revReply = #{param1}
+	</select> -->
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

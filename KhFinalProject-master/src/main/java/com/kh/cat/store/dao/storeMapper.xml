@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace=연결되는 인터페이스 -->    
+<mapper namespace="com.kh.cat.store.dao.StoreInter">
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야한다.(몇가지 옵션이 필요하다.)) -->
+	<!-- 
+		parameterType 지정 (파라메터로 사용될 dto(bean))
+		useGenertedKeys = "true" (insert 후 키 생성 여부)
+		keyProperty = "idx" (키가 될 필드(dto변수))
+		keyColumn = "idx" (키가 저장될 DB 컬럼)
+	-->
+	
+	<!-- 맛집 등록 -->
+	<insert id="storeRegist" parameterType="store" 
+	useGeneratedKeys="true" keyProperty="store_idx" keyColumn="store_idx">
+		INSERT INTO store(store_Idx, id, store_photo, store_name, store_ceo, 
+		store_addr, store_price, store_time, store_food, store_phone, 
+		store_rest, store_bHit, store_revCnt, store_revDate, store_star, store_regist, store_storeLikeCnt)
+		VALUES(seq_store.NEXTVAL, #{id}, #{store_photo}, #{store_name}, #{store_ceo},
+		 #{store_addr}, #{store_price}, #{store_time}, #{store_food}, #{store_phone},
+		 #{store_rest}, 0, 0, SYSDATE, 0,0,0)
+	</insert>
+	
+	<!-- 맛집 해쉬태그 등록 -->
+	<insert id="storeHashTag">
+	 	INSERT INTO hash(hash_cate, store_Idx, hash_tag)
+		VALUES('store',#{param1}, #{param2})
+	</insert>
+	
+	<!-- 메뉴사진 등록 -->
+	<insert id="storeMenu">
+		INSERT INTO menu(store_Idx, menu_photo)
+		VALUES(#{param1}, #{param2})
+	</insert>
+	
+	<!-- 맛집 상세보기 -->
+	<select id="storeDetail" resultType="store">
+		SELECT * FROM store WHERE store_idx = #{param1} 
+	 </select>
+	 
+	 <!-- 맛집 해쉬태그 불러오기 -->
+	 <select id="storeHash" resultType="hash">
+	 	SELECT * FROM hash WHERE hash_cate = 'store' AND store_idx = #{param1}
+	 </select>
+	 
+	 <!-- 맛집 메뉴 불러오기 -->
+	 <select id="menuPhoto" resultType="menu">
+	 	SELECT * FROM menu WHERE store_idx = #{param1} 
+	 </select>
+	 
+	 <!-- 찜 여부 보기 -->
+	 <select id="storeLikeChk" resultType="String">
+	 	SELECT id FROM storeLike WHERE id= #{param1} AND store_idx = #{param2} 
+	 </select>
+
+	<!-- 맛집 찜 등록 -->
+	<insert id="storeLike">
+	 	INSERT INTO storeLike(storeLike_idx, store_idx, id, storeLike_date)
+		VALUES(seq_storeLike.NEXTVAL,#{param2}, #{param1},SYSDATE)
+	</insert>
+
+	<!-- 맛집 찜 취소 -->
+	<delete id="storeLikeDel">
+		DELETE FROM storeLike WHERE id = #{param1} AND store_idx = #{param2}
+	</delete>
+	
+	<!-- 맛집 찜 갯수 증가 -->
+	<update id="storeLikeCntUp">
+		UPDATE store SET store_storeLikeCnt=store_storeLikeCnt+1 WHERE store_idx = #{param1}
+	</update>
+	
+	<!-- 맛집 찜 갯수 감소 -->
+	<update id="storeLikeCntDown">
+		UPDATE store SET store_storeLikeCnt=store_storeLikeCnt-1 WHERE store_idx = #{param1}
+	</update>
+
+	<!-- 찜 개수 세기 -->
+	<select id="storeLikeCnt" resultType="Integer">
+		SELECT store_storeLikeCnt FROM store WHERE store_idx = #{param1} 
+	</select>
+	
+	 <!-- 조회수 증가 -->
+	 <update id="storeUphits">
+		UPDATE store SET store_bHit=store_bHit+1 WHERE store_idx = #{param1}
+	</update>
+	
+	 <!-- 등록 여부 검사 -->
+	<select id="registSF" resultType="Integer">
+		SELECT store_regist FROM store WHERE store_idx = #{param1} 
+	</select>
+</mapper>

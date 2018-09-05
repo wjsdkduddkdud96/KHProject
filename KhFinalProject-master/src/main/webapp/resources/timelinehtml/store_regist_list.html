@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Insert title here</title>
+		<style>
+			div#store_regist_main{position: relative; border: none; width: 100%; height: 100%;}
+			div#store_regist_subMain{position: absolute; top: 0px; left: 0px; width: auto; height: auto; border: none;}
+			
+			table, th, td{border-top: 1px solid black; border-bottom: 1px solid black; border-collapse: collapse; text-align: center;}             
+			table#store_regist_table{width: 1000px; border-bottom: none;}     
+			td{border-top: 1px solid lightgray; border-bottom: 1px solid lightgray;}  
+			td#storeRegist_paging{border: none;}
+			th#store_name{width: 150px; height: 50px;}
+			th#store_user_name{width: 100px; height: 50px;}
+			th#store_addr{width: 200px; height: 50px;}
+			th#store_date{width: 100px; height: 50px;}
+			th#store_YN{width: 110px; height: 50px;} 
+			th#store_move{width: 50px; height: 50px;}
+		</style>
+	</head>
+	<body>
+		<div id="store_regist_main">
+			<div id="store_regist_subMain">
+				<table id="store_regist_table" >
+					<thead>    
+						<tr>      
+							<th id="store_name">가게 상호명</th>
+							<th id="store_user_name">대표자 이름</th>
+							<th id="store_addr">주소</th>
+							<th id="store_date">날짜</th>
+							<th id="store_move">보기</th>   
+							<th id="store_YN">승인여부</th>
+						</tr>
+					</thead>
+					<tbody id="store_tbody">
+						
+					</tbody>
+					<tr>
+						<td colspan="6" id="storeRegist_paging">
+							<div id="storeRegist_container"></div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</body>
+	<script>
+		
+	</script>
+</html>

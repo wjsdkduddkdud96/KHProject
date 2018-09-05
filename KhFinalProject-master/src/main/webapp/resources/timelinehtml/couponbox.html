@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>		
+			#couponbox{position: absolute;top: 60px;}
+			table, th{border-bottom: 1px solid black;border-top: 1px solid black;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+			th{width: 200px;}
+			td{border-bottom: 1px solid lightgray;width: 200px;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+			#couponname{width: 660px;text-align: center;}
+		</style>
+</head>
+<body>
+<div>
+			<div id="couponname">
+				구매한 쿠폰
+			</div>
+			<div id="couponbox">
+				<table>
+				<thead>
+					<tr>
+						<th>쿠폰이름</th>
+						<th>쿠폰 코드</th>
+						<th>쿠폰사용여부</th>
+					</tr>
+					</thead>
+					<tbody id="list">
+					
+					</tbody>
+					<tr>
+						<td colspan="3" id="paging"><div id="container"></div></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace=연결되는 인터페이스 -->    
+<mapper namespace="com.kh.cat.common.dao.CommonInter">
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야한다.(몇가지 옵션이 필요하다.)) -->
+	<!-- 
+		parameterType 지정 (파라메터로 사용될 dto(bean))
+		useGenertedKeys = "true" (insert 후 키 생성 여부)
+		keyProperty = "idx" (키가 될 필드(dto변수))
+		keyColumn = "idx" (키가 저장될 DB 컬럼)
+	-->
+	<select id="receivelist" resultType="dm">
+	SELECT * FROM (SELECT dm_idx,id,dm_id,dm_content,dm_date,ROW_NUMBER()
+	 OVER (ORDER BY dm_idx DESC) AS rnum FROM dm WHERE dm_id=#{param1}) 
+	 WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="sendlist" resultType="dm">
+		SELECT * FROM (SELECT dm_idx,id,dm_id,dm_content,dm_date,ROW_NUMBER()
+	 OVER (ORDER BY dm_idx DESC) AS rnum FROM dm WHERE id=#{param1}) 
+	 WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="receivedetail" resultType="dm">
+		SELECT * FROM dm WHERE dm_idx=#{param1}
+	</select>
+	<select id="senddetail" resultType="dm">
+		SELECT * FROM dm WHERE dm_idx=#{param1}
+	</select>
+	<select id="memberpoint" resultType="String">
+		SELECT pointCnt FROM member WHERE id=#{param1}
+	</select>
+	<select id="pointList" resultType="pointList">
+		SELECT * FROM (SELECT pointList_idx,id,pointList_point,pointList_type,pointList_cate,pointList_date,ROW_NUMBER()
+	 OVER (ORDER BY pointList_idx DESC) AS rnum FROM pointList WHERE id=#{param1}) 
+	 WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="couponlist" resultType="couponBox">
+		SELECT couponBox_code,id,couponBox_use,couponBox_date,couponBox_name,couponBox_price FROM
+		(SELECT couponBox_code,id,couponBox_use,couponBox_date,couponBox_name,couponBox_price,
+		ROW_NUMBER() OVER (ORDER BY couponBox_date DESC) AS rnum FROM couponbox WHERE id=#{param1})
+		WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="messagesendidcheck" resultType="String">
+		SELECT id FROM member WHERE id=#{param1}
+	</select>
+	<insert id="sendmsg" useGeneratedKeys="true" keyColumn="dm_idx" keyProperty="dm_idx" parameterType="dm">
+		INSERT INTO dm VALUES(seq_dm.NEXTVAL,#{id},#{dm_id},#{dm_content},SYSDATE)
+	</insert>
+	<select id="reviewtimelinecnt" resultType="Integer">
+		SELECT COUNT(*) FROM review WHERE id=#{param1}
+	</select>
+	<select id="liketimelinecnt" resultType="Integer">
+		SELECT COUNT(*) FROM revLike WHERE id=#{param1}
+	</select>
+	<select id="storeliketimelinecnt" resultType="Integer">
+		SELECT COUNT(*) FROM storeLike WHERE id=#{param1}
+	</select>
+	<select id="followtimelinecnt" resultType="Integer">
+		SELECT COUNT(*) FROM follow WHERE id=#{param1}
+	</select>
+	<select id="timelinereviewlist" resultType="review">
+		SELECT * FROM (SELECT review_idx,store_idx,id,review_storename,review_star,review_content,review_likecnt,review_date,
+		review_profile,review_replycnt,ROW_NUMBER() OVER (ORDER BY review_idx DESC) AS rnum FROM review WHERE id=#{param1})
+		WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<insert id="followinsert" useGeneratedKeys="true" keyColumn="follow_idx" keyProperty="follow_idx" parameterType="follow">
+		INSERT INTO follow VALUES(seq_follow.NEXTVAL,#{id},#{follow_id})
+	</insert>
+	<select id="followcheck" resultType="String">
+		SELECT id FROM follow WHERE id=#{param1} AND follow_id=#{param2}
+	</select>
+	<delete id="followdelete">
+		DELETE FROM follow WHERE id=#{param1} AND follow_id=#{param2}
+	</delete>
+	<select id="timelinereview" resultType="Integer">
+		SELECT review_idx FROM revlike WHERE id=#{param1}
+	</select>
+	<select id="timlinepagereview" resultType="Integer">
+	SELECT review_idx FROM (SELECT review_idx,ROW_NUMBER() OVER (ORDER BY review_idx DESC) 
+		AS rnum FROM revlike WHERE id=#{param1}) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="timlinepagereviewreply" resultType="Integer">
+	SELECT review_idx FROM (SELECT review_idx,ROW_NUMBER() OVER (ORDER BY review_idx DESC) 
+		AS rnum FROM revreply WHERE id=#{param1}) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="timelinelikereview" resultType="review">
+		SELECT * FROM review WHERE review_idx=#{param1}
+	</select>
+	<select id="my_reply" resultType="Integer">
+		SELECT review_idx FROM revreply WHERE id=#{param1}
+	</select>
+	<select id="timelinprofile" resultType="String">
+		SELECT profile FROM member WHERE id=#{param1}
+	</select>
+
+	<!-- 페이징 count -->
+	<select id="allCount" resultType="Integer">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT COUNT(*) FROM store WHERE store_revCnt > 4 AND store_regist=1
+			</when>
+			<otherwise>
+				SELECT COUNT(*) FROM store WHERE store_regist=1
+			</otherwise>
+		</choose>
+	</select>
+	<select id="searchAndStoreCount" resultType="Integer">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT COUNT(*) FROM store WHERE store_revCnt > 4 AND store_regist=1 AND store_addr LIKE '%'||#{map}||'%' AND store_name LIKE '%'||#{store_searchCnt}||'%'
+			</when>
+			<otherwise>
+				SELECT COUNT(*) FROM store WHERE store_regist=1 AND  store_addr LIKE '%'||#{map}||'%' AND store_name LIKE '%'||#{store_searchCnt}||'%'
+			</otherwise>
+		</choose>
+	</select>
+	<select id="searchOrStoreCount" resultType="Integer" parameterType="hashmap">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT COUNT(*) FROM store WHERE store_regist=1 AND store_revCnt > 4 AND 
+				<foreach collection="store_searchCnt" item="store_searchCnt" index="index" open="(" close=")" separator="OR">
+					store_name LIKE '%'||#{store_searchCnt}||'%'
+				</foreach>
+			</when>
+			<otherwise>
+				SELECT COUNT(*) FROM store WHERE store_regist=1 AND 
+				<foreach collection="store_searchCnt" item="store_searchCnt" index="index" open="(" close=")" separator="OR">
+					store_name LIKE '%'||#{store_searchCnt}||'%'
+				</foreach>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="searchHashStoreCount" resultType="Integer" parameterType="hashmap">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT COUNT(DISTINCT sto.store_idx)
+				FROM (SELECT * FROM store WHERE store_regist=1 AND store_revCnt > 4 AND store_addr LIKE '%'||#{map}||'%') sto,
+				(SELECT * FROM hash WHERE 
+				<foreach collection="store_searchCnt" item="store_searchCnt" index="index" separator="OR">
+					hash_tag LIKE '%'||#{store_searchCnt}||'%'
+				</foreach>
+				) hashtag WHERE sto.store_idx=hashtag.store_idx
+			</when>
+			<otherwise>
+				SELECT COUNT(DISTINCT sto.store_idx)
+				FROM (SELECT * FROM store WHERE store_regist=1 AND store_addr LIKE '%'||#{map}||'%') sto,
+				(SELECT * FROM hash WHERE 
+				<foreach collection="store_searchCnt" item="store_searchCnt" index="index" separator="OR">
+					hash_tag LIKE '%'||#{store_searchCnt}||'%'
+				</foreach>
+				) hashtag WHERE sto.store_idx=hashtag.store_idx
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="storeSearch_And" resultType="store" parameterType="hashmap">
+		<choose>
+	 		<when test="mainStore==3">
+	 		SELECT * FROM (SELECT * FROM store ORDER BY store_revdate DESC)
+	 			<![CDATA[WHERE ROWNUM <= 3]]>
+	 			AND store_regist=1 AND store_revCnt > 0
+	 		</when>
+	 		<when test="sort.equals('별점 순')">
+	 		SELECT * FROM
+				(SELECT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo,
+				ROW_NUMBER() OVER(ORDER BY store_star DESC) AS rnum 
+					FROM store WHERE store_regist=1 AND store_revCnt > 4 AND store_addr LIKE '%'||#{map}||'%' AND store_name LIKE '%'||#{content}||'%')
+				WHERE rnum BETWEEN #{start} AND #{end}
+	 		</when>
+			<otherwise>
+				SELECT * FROM
+				(SELECT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo,ROW_NUMBER() OVER(
+				<if test="sort.equals('리뷰 최신 순')">ORDER BY store_revdate DESC</if>
+				<if test="sort.equals('별점 순')">ORDER BY store_star DESC</if>
+				<if test="sort.equals('조회수 순')">ORDER BY store_bhit DESC</if>
+				<if test="sort.equals('리뷰수 순')">ORDER BY store_revCnt DESC</if>
+				) AS rnum 
+					FROM store WHERE store_regist=1 AND store_addr LIKE '%'||#{map}||'%' AND store_name LIKE '%'||#{content}||'%')
+				WHERE rnum BETWEEN #{start} AND #{end}
+	 		</otherwise>
+	 	</choose>
+	</select>
+	<select id="storeSearch_Or" resultType="store" parameterType="hashmap">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT * FROM 
+				(SELECT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo,
+				ROW_NUMBER() OVER(ORDER BY store_star DESC) AS rnum 
+						FROM store WHERE store_regist=1 AND store_revCnt > 4 AND store_addr LIKE '%'||#{map}||'%' AND
+				<foreach collection="content" item="content" index="index" open="(" close=")" separator="OR">
+					store_name LIKE '%'||#{content}||'%'
+				</foreach>
+				) WHERE rnum BETWEEN #{start} AND #{end}
+			</when>
+			<otherwise>
+			SELECT * FROM 
+			(SELECT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo,ROW_NUMBER() OVER(
+			<if test="sort.equals('리뷰 최신 순')">ORDER BY store_revdate DESC</if>
+			<if test="sort.equals('별점 순')">ORDER BY store_star DESC</if>
+			<if test="sort.equals('조회수 순')">ORDER BY store_bhit DESC</if>
+			<if test="sort.equals('리뷰수 순')">ORDER BY store_revCnt DESC</if>
+			) AS rnum 
+					FROM store WHERE store_regist=1 AND store_addr LIKE '%'||#{map}||'%' AND
+			<foreach collection="content" item="content" index="index" open="(" close=")" separator="OR">
+				store_name LIKE '%'||#{content}||'%'
+			</foreach>
+			) WHERE rnum BETWEEN #{start} AND #{end}
+			</otherwise>
+		</choose>
+	</select>
+	<select id="storeSearch_Hash" resultType="store" parameterType="hashmap">
+		<choose>
+			<when test="sort.equals('별점 순')">
+				SELECT DISTINCT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo FROM
+				(SELECT sto.store_idx,sto.store_name,sto.store_addr,sto.store_revdate,sto.store_star,sto.store_bhit,sto.store_revCnt,sto.store_photo
+					,ROW_NUMBER() OVER(ORDER BY store_star DESC) AS rnum
+					FROM (SELECT * FROM store WHERE store_regist=1 AND store_revCnt > 4 AND store_addr LIKE '%'||#{map}||'%') sto, 
+					(SELECT * FROM hash WHERE 
+				<foreach collection="content" item="content" index="index" separator="OR">
+					hash_tag LIKE '%'||#{content}||'%'
+				</foreach>
+				) hashtag WHERE sto.store_idx=hashtag.store_idx) WHERE rnum BETWEEN #{start} AND #{end}
+			</when>
+			<otherwise>
+				SELECT DISTINCT store_idx,store_name,store_addr,store_revdate,store_star,store_bhit,store_revCnt,store_photo FROM
+				(SELECT sto.store_idx,sto.store_name,sto.store_addr,sto.store_revdate,sto.store_star,sto.store_bhit,sto.store_revCnt,sto.store_photo
+					,ROW_NUMBER() OVER(
+					<if test="sort.equals('리뷰 최신 순')">ORDER BY store_revdate DESC</if>
+					<if test="sort.equals('별점 순')">ORDER BY store_star DESC</if>
+					<if test="sort.equals('조회수 순')">ORDER BY store_bhit DESC</if>
+					<if test="sort.equals('리뷰수 순')">ORDER BY store_revCnt DESC</if>
+					) AS rnum
+					FROM (SELECT * FROM store WHERE store_regist=1 AND store_addr LIKE '%'||#{map}||'%') sto, 
+					(SELECT * FROM hash WHERE 
+				<foreach collection="content" item="content" index="index" separator="OR">
+					hash_tag LIKE '%'||#{content}||'%'
+				</foreach>
+				) hashtag WHERE sto.store_idx=hashtag.store_idx) WHERE rnum BETWEEN #{start} AND #{end}
+			</otherwise>
+		</choose>
+	</select>
+	<select id="storeHash" resultType="hash">
+		SELECT * FROM hash WHERE store_idx=#{param1}
+	</select>
+	<select id="timelinereviewreply" resultType="revReply">
+		SELECT * FROM revreply WHERE review_idx=#{param1}
+	</select>
+	
+	<!-- 신고리스트(관리자) -->
+	<!-- <select id="complainList" resultType="complain">
+		SELECT * FROM complain ORDER BY complain_idx
+	</select> -->
+	
+	<!-- 가게 등록 리스트(관리자) -->
+	<!-- <select id="storeRegistList" resultType="store">
+		SELECT * FROM store ORDER BY store_idx
+	</select> -->
+
+	<update id="reply_update">
+		UPDATE revreply SET revreply_content=#{param2} WHERE revreply_idx=#{param1}
+	</update>
+	<delete id="reply_delete">
+		DELETE FROM revreply WHERE revreply_idx=#{param1}
+	</delete>
+	<select id="likestore" resultType="Integer">
+		SELECT store_idx FROM storelike WHERE id=#{param1}
+	</select>
+	<select id="timlinepagestore" resultType="Integer">
+		SELECT store_idx FROM (SELECT store_idx,ROW_NUMBER() OVER (ORDER BY store_idx DESC) 
+		AS rnum FROM storelike WHERE id=#{param1}) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="timelinelikestore" resultType="store">
+		SELECT * FROM store WHERE store_idx=#{param1}
+	</select>
+	<select id="likestorehash" resultType="hash">
+		SELECT * FROM hash WHERE store_idx=#{param1}
+	</select>
+
+	<select id="statList" resultType="store">
+		SELECT * FROM store WHERE id=#{param1}
+	</select>
+	
+	<select id="storeList" resultType="store">
+		SELECT store_idx FROM store
+	</select>
+
+	<select id="getStarAvg" resultType="Double">
+		SELECT total_starAvg FROM total WHERE store_idx=#{param1}
+	</select>
+	
+	<insert id="insertStat">
+		INSERT INTO total(store_idx, total_date, total_revCnt, total_bhitCnt, total_starAvg) VALUES(#{param1},#{param3},0,0,#{param2})
+	</insert>
+	
+	<!-- 
+	<select id="showStat" resultType="total">
+		SELECT * FROM total 
+		<![CDATA[
+		WHERE total_date > to_date(SYSDATE-15, 'YY/MM/DD') AND total_date < to_date(SYSDATE+1, 'YY/MM/DD')
+		]]>
+		 AND store_idx=#{param1} ORDER BY total_date ASC
+	</select>
+	 -->
+	 <select id="showStat" resultType="total">
+		SELECT * FROM total WHERE  store_idx=#{param1} ORDER BY total_date ASC
+	</select>
+	
+	<update id="uphitStat">
+		UPDATE total SET total_bhitCnt= total_bhitCnt+1 WHERE  total_date > to_date(SYSDATE-1, 'YY/MM/DD') AND store_idx = #{param1}
+	</update>
+	
+	<select id="followlist" resultType="String">
+		SELECT id FROM follow WHERE follow_id=#{param1}
+	</select>
+	<select id="pagefollowlist" resultType="String">
+	SELECT id FROM (SELECT id,ROW_NUMBER() OVER (ORDER BY follow_idx DESC) 
+		AS rnum FROM follow WHERE follow_id=#{param1}) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="following" resultType="String">
+		SELECT follow_id FROM follow WHERE id=#{param1}
+	</select>
+	<select id="pagefollowing" resultType="String">
+	SELECT follow_id FROM (SELECT follow_id,ROW_NUMBER() OVER (ORDER BY follow_idx DESC) 
+		AS rnum FROM follow WHERE id=#{param1}) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<select id="followlistprofile" resultType="member">
+		SELECT id,profile FROM member WHERE id=#{param1}
+	</select>
+	<select id="followingprofile" resultType="member">
+		SELECT id,profile FROM member WHERE id=#{param1}
+	</select>
+	<select id="alarmlist" resultType="alarm">
+	SELECT alarm_idx,alarm_id,alarm_cate,revlike_idx,revreply_idx,follow_idx,dm_idx,alarm_read FROM 
+	(SELECT alarm_idx,alarm_id,alarm_cate,revlike_idx,revreply_idx,follow_idx,dm_idx,alarm_read,ROW_NUMBER() OVER (ORDER BY alarm_idx DESC) 
+		AS rnum FROM alarm WHERE alarm_id=#{param1} AND alarm_read=0) WHERE rnum BETWEEN #{param2} AND #{param3}
+	</select>
+	<insert id="alarminsert">
+		INSERT INTO alarm(alarm_idx,alarm_id,alarm_cate,follow_idx,alarm_read) VALUES(seq_alarm.NEXTVAL,#{param2},'팔로우',#{param1},0)
+	</insert>
+	<update id="alarmread">
+		UPDATE alarm SET alarm_read=1 WHERE alarm_idx=#{param1} 
+	</update>	
+	<insert id="alarmdminsert">
+		INSERT INTO alarm(alarm_idx,alarm_id,alarm_cate,dm_idx,alarm_read) VALUES(seq_alarm.NEXTVAL,#{param2},'메세지',#{param1},0)
+	</insert>
+	<select id="couponallCount" resultType="Integer">
+	 	SELECT COUNT(*) FROM couponbox WHERE id=#{param1}
+	 </select>
+	 <select id="receivelistallCount" resultType="Integer">
+	 	SELECT COUNT(*) FROM dm WHERE dm_id=#{param1}
+	 </select>
+	 <select id="sendlistallCount" resultType="Integer">
+	 	SELECT COUNT(*) FROM dm WHERE id=#{param1}
+	 </select>
+	 <select id="pointallCount" resultType="Integer">
+	 	SELECT COUNT(*) FROM pointList WHERE id=#{param1}
+	 </select>
+	 <select id="alarmcnt" resultType="Integer">
+	 	SELECT COUNT(*) FROM alarm WHERE alarm_id=#{param1} AND alarm_read=0
+	 </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

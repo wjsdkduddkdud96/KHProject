@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+			#pointbox{position: absolute;top: 60px;}
+			table, th{border-bottom: 1px solid black;border-top: 1px solid black;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+			th{width: 200px;}
+			td{border-bottom: 1px solid lightgray;width: 200px;border-collapse: collapse;padding: 5px 10px;text-align: center;}
+			#pointname{width: 660px;text-align: center;}
+		</style>
+</head>
+<body>
+	<div>
+			<div id="pointname">
+				포인트 내역
+			</div>
+			<div id="totalpoint">
+				포인트 총액 :<input type="text" id="pointcnt" readonly/>
+			</div>
+			<div id="pointbox">
+				<table>
+				<thead>
+					<tr>
+						<th>날짜</th>
+						<th>포인트 내역</th>
+						<th>금액</th>
+					</tr>
+					</thead>
+					<tbody id="list">
+					
+					</tbody>
+					<tr>
+						<td colspan="3" id="paging"><div id="container"></div></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+</body>
+<script>
+</script>
+</html>

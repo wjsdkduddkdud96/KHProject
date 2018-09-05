@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	
+	<!-- 인터셉터 그룹 -->
+	<mvc:interceptors>
+		<!-- 단일 인터셉터 -->
+		<mvc:interceptor>
+			<!-- 인터셉터할 요청 -->
+			<mvc:mapping path="/storeRegistForm"/>
+			<mvc:mapping path="/receivelist"/>			
+			<mvc:mapping path="/reviewWritePage"/>			
+			<mvc:mapping path="/sendlist"/>		
+			<mvc:mapping path="/sendMessage"/>		
+			<mvc:mapping path="/receivedetail"/>			
+			<mvc:mapping path="/senddetail"/>			
+			<mvc:mapping path="/pointlist"/>		
+			<mvc:mapping path="/couponlist"/>			
+			<mvc:mapping path="/messagesendidcheck"/>			
+			<mvc:mapping path="/sendmsg"/>		
+			<mvc:mapping path="/followinsert"/>		
+			<mvc:mapping path="/followdelete"/>			
+			<mvc:mapping path="/complain"/>
+			<mvc:mapping path="/reviewWrite"/>
+			<mvc:mapping path="/replyWrite"/>		
+			<mvc:mapping path="/reviewLike"/>
+			<mvc:mapping path="/review_updateForm"/>
+			<mvc:mapping path="/review_delete"/>
+			<mvc:mapping path="/Revreply_delete"/>
+			<mvc:mapping path="/Revreply_update"/>
+			<mvc:mapping path="/dm_writePage"/>
+			
+			<!-- board -->
+			<mvc:mapping path="/boardWritePage"/>
+			<mvc:mapping path="/boardWrite"/>
+			<mvc:mapping path="/boardUpdate"/>
+			<mvc:mapping path="/boardDelete"/>
+			<mvc:mapping path="/updateForm"/>
+			<!-- boardReply -->
+			<mvc:mapping path="/boardReplyWrite"/>
+			<mvc:mapping path="/boardReplyUpdate"/>
+			<mvc:mapping path="/boardReplyDelete"/>
+			<!-- coupon -->
+			<mvc:mapping path="/couponShopPage"/>
+			<mvc:mapping path="/couponPurchase"/>
+			<!-- admin -->
+
+			
+					
+			<!-- 인터셉터 한 내용에 대한 클래스 매핑 -->
+			<bean class="com.kh.cat.common.service.PreCheck"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	<!-- 인터셉터 할 내용에 대한 클래스 매핑 -->
+</beans>

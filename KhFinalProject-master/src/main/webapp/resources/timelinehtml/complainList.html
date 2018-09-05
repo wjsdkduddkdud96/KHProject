@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Insert title here</title>
+		<style>
+			div#complain_main{position: relative; border: none; width: 100%; height: 100%;}
+			div#complain_subMain{position: absolute; top: 10px; left: 25px; width: auto; height: auto; border: none;}
+			
+			table, th, td{border-top: 1px solid black; border-bottom: 1px solid black; border-collapse: collapse; text-align: center;}            
+			table#complain_table{width: 1000px; border-bottom: none;}	      
+			td{border-top: 1px solid lightgray; border-bottom: 1px solid lightgray;}  
+			td#complain_paging{border: none;}
+			th#user_id{width: 120px; height: 50px;}
+			th#complain_type{width: 100px; height: 50px;}
+			th#complain_user_id{width: 150px; height: 50px;}
+			th#complain_cate{width: 80px; height: 50px;}
+			th#complain_date{width: 100px; height: 50px;}
+			th#complain_move{width: 50px; height: 50px;} 
+		</style>
+	</head>
+	<body>
+		<div id="complain_main">
+			<div id="complain_subMain">
+				<table id="complain_table" >
+					<thead>    
+						<tr>      
+							<th id="user_id">신고한 아이디</th>
+							<th id="complain_type">신고 유형</th>
+							<th id="complain_user_id">신고 받은 아이디</th>
+							<th id="complain_cate">리뷰/댓글</th>
+							<th id="complain_date">신고 날짜</th>
+							<th id="complain_move"></th>
+						</tr>
+					</thead>
+					<tbody id="complail_tbody" class="complain_table">
+						
+					</tbody>
+					<tr>
+						<td colspan="6" id="complain_paging">
+							<div id="complain_container"></div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</body>
+	<script>
+		
+	</script>
+</html>

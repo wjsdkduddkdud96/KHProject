@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace=연결되는 인터페이스 -->    
+<mapper namespace="com.kh.cat.board.dao.BoardInter">
+	<!-- 글쓰기(등록된 글의 idx 컬럼을 반환해야한다.(몇가지 옵션이 필요하다.)) -->
+	<!-- 
+		parameterType 지정 (파라메터로 사용될 dto(bean))
+		useGenertedKeys = "true" (insert 후 키 생성 여부)
+		keyProperty = "idx" (키가 될 필드(dto변수))
+		keyColumn = "idx" (키가 저장될 DB 컬럼)
+	-->
+	<insert id="boardWrite" parameterType="board" useGeneratedKeys="true" keyProperty="board_idx" keyColumn="board_idx">
+		INSERT INTO board(board_idx, id, board_subject, board_content, board_cate, board_date)
+			VALUES(seq_board.NEXTVAL, #{id}, #{board_subject}, #{board_content}, #{board_cate}, SYSDATE)
+	</insert>
+	
+	<select id="boardDetail" resultType="board">
+		SELECT board_idx, id, board_subject, board_content, board_cate, board_date 
+			FROM board WHERE board_idx = #{board_idx}
+	</select>
+	
+	<update id="boardUpdate" parameterType="board">
+		UPDATE board SET board_subject = #{board_subject}, board_content = #{board_content}
+			WHERE board_idx = #{board_idx}	
+	</update>
+	
+	<delete id="boardDelete">
+		DELETE FROM board WHERE board_idx = #{param1}
+	</delete>
+	
+	<!-- <select id="boardList" resultType="board">
+		SELECT board_idx, id, board_subject, board_content, board_cate, board_date
+			FROM board ORDER BY board_cate ASC, board_idx DESC
+	</select> -->
+	<!-- 공지사항 출력 -->
+	<select id="boardList2" resultType="board">
+		SELECT board_idx, id, board_subject, board_cate, board_date FROM board
+			WHERE board_cate='공지사항' ORDER BY board_idx DESC
+	</select>
+	<!-- 문의사항 페이징 -->
+	<select id="boardList" resultType="board">
+		SELECT board_idx, id, board_subject, board_cate, board_date FROM
+			(SELECT board_idx, id, board_subject, board_cate, board_date,
+			ROW_NUMBER() OVER (ORDER BY board_idx DESC) AS rnum FROM board WHERE board_cate = '문의사항')
+			WHERE rnum BETWEEN #{param1} AND #{param2}
+	</select>
+	
+	<!-- 문의사항 게시물 총 갯수 -->
+	<select id="boardAllCnt" resultType="Integer">
+		SELECT COUNT(*) FROM board WHERE board_cate = '문의사항'
+	</select>
+	
+	<!-- 문의사항 댓글 작성 -->
+	<insert id="boardReplyWrite" parameterType="boardReply">
+		INSERT INTO boardReply(boardReply_idx, board_idx, id, boardReply_content, boardReply_date)
+			VALUES(seq_boardReply.NEXTVAL, #{board_idx}, #{id}, #{boardReply_content}, SYSDATE)
+	</insert>
+	<!-- 문의사항 댓글 리스트 -->
+	<select id="boardReplyList" resultType="boardReply">
+		SELECT boardReply_idx, board_idx, id, boardReply_content, boardReply_date
+			FROM boardReply WHERE board_idx = #{board_idx}
+	</select>
+	<!-- 문의사항 댓글 갯수 -->
+	<select id="replyCnt" resultType="Integer">
+		SELECT COUNT(*) FROM boardReply WHERE board_idx = #{param1}
+	</select>
+	<!-- 문의사항 댓글 수정 -->
+	<update id="boardReplyUpdate" parameterType="boardReply">
+		UPDATE boardReply SET boardReply_content = #{boardReply_content} 
+			WHERE boardReply_idx = #{boardReply_idx} AND board_idx = #{board_idx}
+	</update>
+	<!-- 문의사항 댓글 삭제 -->
+	<delete id="boardReplyDelete">
+		DELETE FROM boardReply 
+			WHERE board_idx = #{param2} AND boardReply_idx = #{param1}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<environments default="development">
+	<environment id="development">
+		<transactionManager type="JDBC"/>
+		<dataSource type="POOLED">
+			<property name="poolMaximumActiveConnections" value="10"/>
+			<property name="poolMaximumIdleConnections" value="10"/>
+			<property name="poolMaximumCheckoutTime" value="20000"/>
+			<property name="poolTimeToWait" value="10000"/>				
+		</dataSource>		
+	</environment>
+</environments>
+ 
+<!-- 
+	transactionManager type="JDBC | MANAGED"
+		: 트랜잭션 자동 처리를 JDBC | mybatis 에게 맡긴다.
+	dataSource type="POOLED | UNPOOLED"
+		: 풀 사용 | 풀 사용하지 않음
+	poolMaximumActiveConnections : 활성화된 최대 커넥션 유지 갯수
+	poolMaximumIdleConnections : 기본적으로 놀고 있는 커넥션 최대 수	
+	poolMaximumCheckoutTime : 커넥션 최대 획득 시간(ms)
+	poolTimeToWait : 사용된 커넥션을 기다리는 시간(ms)
+ -->

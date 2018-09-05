@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+	div#statList_main{position: relative; border: none; width: 100%; height: 100%;}
+	div#statList_sub{position: absolute; top: 10px; left: 75px; width: auto; height: auto; border: none;}
+	
+	table, th, td{border-top: 1px solid black; border-bottom: 1px solid black; border-collapse: collapse; text-align: center;}            
+	table#statList_table{width: 500px; border-bottom: none;}	      
+	td{border-top: 1px solid lightgray; border-bottom: 1px solid lightgray;}      
+	#storeName{width: 660px;text-align: center;}
+	
+	#statList_name{width: 400px;}
+</style>
+<title>통계 리스트</title>
+</head>
+<style>
+</style>
+<body>
+
+	<div id="storeName">가게 리스트</div>
+	<div id="statList_main">
+		<div id="statList_sub">
+			<table id="statList_table">
+				<thead>
+					<tr>
+						<th id="statList_name">상호명</th>
+						<th id="statList_total">통계</th>
+					</tr>
+				</thead>
+				<tbody id="storeList">		
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+</body>
+
+</html>
